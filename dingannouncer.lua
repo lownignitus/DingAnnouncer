@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.0.0
+-- Version: 1.0.1
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
@@ -12,6 +12,7 @@ local index = ""
 local message = ""
 local ding = "no"
 local perCount = 0
+SLASH_DINGANNOUNCER1 = "/da" or "/DA" or "/DingAnnouncer" or "/dingannouncer"
 
 -- RegisterForEvent table
 local daEvents_table = {}
@@ -126,14 +127,15 @@ function daOptionsInit()
 	-- Enable addon, 
 	local daAutoToggle = ccb("Toggle Auto Announce", 18, 18, "TOPLEFT", optionsTitle, "TOPLEFT", -130, -16, "daAutoToggle")
 	daAutoToggle:SetScript("OnClick", function(self) 
---		print("Toggle")
+--[[		print("Toggle")
 		if daAutoToggle:GetChecked() == true then
---			print("true")
+			print("true")
 			daSettings.options.daActivate = true
 		else
---			print("false")
+			print("false")
 			daSettings.options.daActivate = false
-		end
+		end]]
+		daAuto()
 	end)
 
 	-- Pick and Set chat to announce to
@@ -166,9 +168,11 @@ function daOptionsInit()
 		if daPercentToggle:GetChecked() == true then
 --			print("true")
 			daSettings.options.daPercent = true
+			ChatFrame1:AddMessage("|cFF00FF00Ding Announcer is now reporting Percentage|r!")
 		else
 --			print("false")
 			daSettings.options.daPercent = false
+			ChatFrame1:AddMessage("|cFFFFF0000Ding Announcer is no longer reporting Percentage|r!")
 		end
 	end)
 
@@ -179,9 +183,11 @@ function daOptionsInit()
 		if daPercentLeftToggle:GetChecked() == true then
 --			print("true")
 			daSettings.options.daPercentLeft = true
+			ChatFrame1:AddMessage("|cFF00FF00Ding Announcer is now reporting Percentage Left|r!")
 		else
 --			print("false")
 			daSettings.options.daPercentLeft = false
+			ChatFrame1:AddMessage("|cFFFFF0000Ding Announcer is no longer reporting Percentage Left|r!")
 		end
 	end)
 
@@ -303,6 +309,25 @@ function daSendMsg(message, index)
 	end
 end
 
+function daAuto()
+	if daSettings.options.daActivate == false then
+		ChatFrame1:AddMessage("Ding Announcer is now on |cFF00FF00Auto|r!")
+		daSettings.options.daActivate = true
+		daAutoToggle:SetChecked(true)
+		daSettings.options.daActivate = false
+		daAutoToggle:SetChecked(false)
+	end
+end
+
+function daOption()
+end
+
+function daInfo()
+	ChatFrame1:AddMessage(GetAddOnMetadata("DingAnnouncer", "Title") .. " " .. GetAddOnMetadata("DingAnnouncer", "Version"))
+	ChatFrame1:AddMessage("Author: " .. GetAddOnMetadata("DingAnnouncer", "Author"))
+	ChatFrame1:AddMessage("Build Date: " .. GetAddOnMetadata("DingAnnouncer", "X-Date"))
+end
+
 function daReset()
 	local function daSVCheck(src, dst)
 		if type(src) ~= "table" then return {} end
@@ -318,4 +343,22 @@ function daReset()
 	end
 
 	daSettings = daSVCheck(deafults, daSettings)
+end
+
+	if msg == "auto" then
+		daAuto()
+	elseif msg == "report" then
+		daChatFunc(curLevel)
+	elseif msg == "options" then
+		daOption()
+	elseif msg == "info" then
+		daInfo()
+	else
+		ChatFrame1:AddMessage("|cFF71C671Ding Announcer Slash Commands|r")
+		ChatFrame1:AddMessage("|cFF71C671type /DA followed by:|r")
+		ChatFrame1:AddMessage("|cFF71C671  -- auto to toggle auto announce functionality|r")
+		ChatFrame1:AddMessage("|cFF71C671  -- report to manually announce level &/or Percentage|r")
+		ChatFrame1:AddMessage("|cFF71C671  -- options to open addon options|r")
+		ChatFrame1:AddMessage("|cFF71C671  -- info to view current build info|r")
+	end
 end
