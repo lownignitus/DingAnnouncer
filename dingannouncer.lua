@@ -314,12 +314,16 @@ function daAuto()
 		ChatFrame1:AddMessage("Ding Announcer is now on |cFF00FF00Auto|r!")
 		daSettings.options.daActivate = true
 		daAutoToggle:SetChecked(true)
+	elseif daSettings.options.daActivate == true then
+		ChatFrame1:AddMessage("Ding Announcer is now on |cFFFFF000Manual|r!")
 		daSettings.options.daActivate = false
 		daAutoToggle:SetChecked(false)
 	end
 end
 
 function daOption()
+	InterfaceOptionsFrame_OpenToCategory("|cff00ff00Ding Announcer|r");
+	InterfaceOptionsFrame_OpenToCategory("|cff00ff00Ding Announcer|r");
 end
 
 function daInfo()
@@ -345,6 +349,7 @@ function daReset()
 	daSettings = daSVCheck(deafults, daSettings)
 end
 
+function SlashCmdList.DINGANNOUNCER(msg)
 	if msg == "auto" then
 		daAuto()
 	elseif msg == "report" then
