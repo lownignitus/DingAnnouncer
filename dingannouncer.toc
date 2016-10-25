@@ -1,6 +1,6 @@
-## Interface: 70000
+## Interface: 70100
 ## Title: |cff00ff00Ding Announcer|r
-## Version: |cffFF4500v1.0.1|r
+## Version: |cffFF4500v1.0.2|r
 ## Author: |cffDA70D6LownIgnitus|r Mihkael@US-Alexstrasza
 ## X-Date: 10/15/2016
 ## X-Website: https://www.facebook.com/groups/190240457669378/
