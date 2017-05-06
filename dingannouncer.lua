@@ -21,7 +21,7 @@ daEvents_table.eventFrame = CF("Frame");
 daEvents_table.eventFrame:RegisterEvent("ADDON_LOADED");
 daEvents_table.eventFrame:RegisterEvent("PLAYER_LEVEL_UP");
 daEvents_table.eventFrame:RegisterEvent("PLAYER_XP_UPDATE");
-daEvents_table.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
+--daEvents_table.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 daEvents_table.eventFrame:SetScript("OnEvent", function(self, event, ...)
 	daEvents_table.eventFrame[event](self, ...);
 end);
@@ -39,6 +39,8 @@ function daEvents_table.eventFrame:ADDON_LOADED(AddOn)
 		["options"] = {
 			["daActivate"] = true,
 			["daChannel"] = "g",
+			["daChannel2Toggle"] = false,
+			["daChannel2"] = "p",
 			["daPercent"] = false,
 			["daPercentLeft"] = false,
 		}
@@ -160,9 +162,44 @@ function daOptionsInit()
 		end
 	end
 	DAChatOptText:SetText("Chat Channel")
+
+	-- Enable option to print to a second channel simultaneously
+	local daChat2Toggle =ccb("Toggle ability to print to a 2nd channel simultaneously.", 18, 18, "TOPLEFT", daChatOpt, "BOTTOMLEFT", 6, -8, "daChat2Toggle")
+	daChat2Toggle:SetScript("OnClick", function(self)
+		if daChat2Toggle:GetChecked() == true then
+			daSettings.options.daChannel2Toggle = true
+			ChatFrame1:AddMessage("|cFF00FF00Ding Announcer is now reporting to 2 channels simultaneously|r!")
+		else
+			daSettings.options.daChannel2Toggle = false
+			ChatFrame1:AddMessage("|cFF00FF00Ding Announcer is no longer reporting to 2 channels simultaneously|r!")
+		end
+	end)
+
+	-- Pick and Set chat to announce to simultaneously
+	local daChat2OptTitle = cf("GameFontNormal", nil, nil, nil, "TOPLEFT", daChat2Toggle, "BOTTOMLEFT", 250, 16, 2, -8, "Select Chat Channel to use.")
+	local info = {}
+	local daChat2Opt = CF("Frame", "DAChat2Opt", daOptions, "UIDropDownMenuTemplate")
+	daChat2Opt:SetPoint("TOPLEFT", daChat2OptTitle, "BOTTOMLEFT", -8, -8)
+	daChat2Opt.initialize = function()
+		wipe(info)
+		local names = {"Guild Chat", "Party Chat", "Instance Chat", "Say Aloud", "Yell Aloud", "Local Chat", "Trade Chat"}
+		local chats = {"GUILD", "PARTY", "INSTANCE_CHAT", "SAY", "YELL", "General", "Trade"}
+		for i, chat in next, chats do
+			info.text = names[i]
+			info.value = chat
+			info.func = function(self)
+				daSettings.options.daChannel2 = self.value
+				DAChatOptText:SetText(self:GetText())
+--				print(self.value)
+			end
+			info.checked = chat == daSettings.options.daChannel2
+			UIDropDownMenu_AddButton(info)
+		end
+	end
+	DAChat2OptText:SetText("Chat Channel") 
 	
 	-- Enable Auto Announcing at 25% 50% & 75%
-	local daPercentToggle = ccb("Toggle reporting when at 25%, 50%, & 75% of level.", 18, 18, "TOPLEFT", daChatOpt, "BOTTOMLEFT", 6, -8, "daPercentToggle")
+	local daPercentToggle = ccb("Toggle reporting when at 25%, 50%, & 75% of level.", 18, 18, "TOPLEFT", daChat2Opt, "BOTTOMLEFT", 6, -8, "daPercentToggle")
 	daPercentToggle:SetScript("OnClick", function(self) 
 --		print("Toggle")
 		if daPercentToggle:GetChecked() == true then
@@ -213,6 +250,12 @@ function daInitialize()
 		daAutoToggle:SetChecked(false)
 	end
 
+	if daSettings.options.daChannel2Toggle == true then
+		daChat2Toggle:SetChecked(true)
+	else
+		daChat2Toggle:SetChecked(false)
+	end
+
 	if daSettings.options.daPercent == true then
 		daPercentToggle:SetChecked(true)
 	else
@@ -251,9 +294,21 @@ end
 function daChatFunc(curLevel)
 --	print("In daChatFunc")
 	if daSettings.options.daChannel == "General" then
-		index = "1"
+		index1 = "1"
 	elseif daSettings.options.daChannel == "Trade" then
-		index = "2"
+		index1 = "2"
+	else
+		index1 = daSettings.options.daChannel
+	end
+
+	if daSettings.options.daChannel2Toggle == true then
+		if daSettings.options.daChannel2 == "General" then
+			index2 = "1"
+		elseif daSettings.options.daChannel2 == "Trade" then
+			index2 = "2"
+		else
+			index2 = daSettings.options.daChannel2
+		end
 	end
 	
 	curLevel = UnitLevel("player")	
@@ -264,13 +319,28 @@ function daChatFunc(curLevel)
 		if daSettings.options.daPercentLeft == false then
 			if curXp >= 0.75 and perCount<3 then
 				message = "I just hit 75% of level " .. curLevel .. "!"
-				daSendMsg(message, index)
+				if daSettings.options.daChannel2Toggle == false then
+					daSendMsg(message, index1)
+				elseif daSettings.options.daChannel2Toggle == true then
+					daSendMsg(message, index1)
+					daSendMsg(message, index2)
+				end
 			elseif curXp >= 0.25 and perCount<1 then
 				message = "I just hit 25% of level " .. curLevel .. "!"
-				daSendMsg(message, index)
+				if daSettings.options.daChannel2Toggle == false then
+					daSendMsg(message, index1)
+				elseif daSettings.options.daChannel2Toggle == true then
+					daSendMsg(message, index1)
+					daSendMsg(message, index2)
+				end
 			elseif curXp >= 0.5  and perCount<2 then
 				message = "I just hit 50% of level " .. curLevel .. "!"
-				daSendMsg(message, index)
+				if daSettings.options.daChannel2Toggle == false then
+					daSendMsg(message, index1)
+				elseif daSettings.options.daChannel2Toggle == true then
+					daSendMsg(message, index1)
+					daSendMsg(message, index2)
+				end
 			elseif curXp <= 0.25 then
 				--
 			end
@@ -278,13 +348,28 @@ function daChatFunc(curLevel)
 --			print("In daPercentLeft")
 			if curXp >= 0.75 and perCount<3 then
 				message = "Only 25% left until level " .. curLevel+1 .. "!"
-				daSendMsg(message, index)
+				if daSettings.options.daChannel2Toggle == false then
+					daSendMsg(message, index1)
+				elseif daSettings.options.daChannel2Toggle == true then
+					daSendMsg(message, index1)
+					daSendMsg(message, index2)
+				end
 			elseif curXp >= 0.25 and perCount<1 then
 				message = "Only 75% left until level " .. curLevel+1 .. "!"
-				daSendMsg(message, index)
+				if daSettings.options.daChannel2Toggle == false then
+					daSendMsg(message, index1)
+				elseif daSettings.options.daChannel2Toggle == true then
+					daSendMsg(message, index1)
+					daSendMsg(message, index2)
+				end
 			elseif curXp >= 0.5 and perCount<2 then
 				message = "Only 50% left until level " .. curLevel+1 .. "!"
-				daSendMsg(message, index)		
+				if daSettings.options.daChannel2Toggle == false then
+					daSendMsg(message, index1)
+				elseif daSettings.options.daChannel2Toggle == true then
+					daSendMsg(message, index1)
+					daSendMsg(message, index2)
+				end		
 			elseif curXp <= 0.25 then
 				--
 			end
@@ -294,7 +379,12 @@ function daChatFunc(curLevel)
 		ding = "no"
 		curLevel = curLevel + 1
 		message = "I just hit level " .. curLevel .. "!"
-		daSendMsg(message, index)
+		if daSettings.options.daChannel2Toggle == false then
+			daSendMsg(message, index1)
+		elseif daSettings.options.daChannel2Toggle == true then
+			daSendMsg(message, index1)
+			daSendMsg(message, index2)
+		end
 	end
 	perCount = math.floor(curXp * 4)
 --	print(perCount)
@@ -305,7 +395,7 @@ function daSendMsg(message, index)
 	if (index ~= nil) and daSettings.options.daChannel == "General" or daSettings.options.daChannel == "Trade" then
 		SendChatMessage(message, "CHANNEL", nil, index)
 	else
-		SendChatMessage(message, daSettings.options.daChannel)
+		SendChatMessage(message, index)
 	end
 end
 
