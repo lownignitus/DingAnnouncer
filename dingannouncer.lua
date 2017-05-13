@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.0.3
+-- Version: 1.0.4
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
@@ -12,6 +12,7 @@ local index = ""
 local message = ""
 local ding = "no"
 local perCount = 0
+local reported = false
 SLASH_DINGANNOUNCER1 = "/da" or "/DA" or "/DingAnnouncer" or "/dingannouncer"
 
 -- RegisterForEvent table
@@ -38,6 +39,7 @@ function daEvents_table.eventFrame:ADDON_LOADED(AddOn)
 	local deafults = {
 		["options"] = {
 			["daActivate"] = true,
+			["daAddOnName"] = true,
 			["daChannel"] = "g",
 			["daChannel2Toggle"] = false,
 			["daChannel2"] = "p",
@@ -140,8 +142,13 @@ function daOptionsInit()
 		daAuto()
 	end)
 
+	local daAddonAdToggle = ccb("Toggle Addon name in Announce", 18, 18, "TOPLEFT", daAutoToggle, "TOPLEFT", 2, -8, "daAddonAdToggle")
+	daAddonAdToggle:SetScript("OnClick", function(self)
+		daAddOnName()
+	end)
+
 	-- Pick and Set chat to announce to
-	local daChatOptTitle = cf("GameFontNormal", nil, nil, nil, "TOPLEFT", daAutoToggle, "BOTTOMLEFT", 250, 16, 2, -8, "Select Chat Channel to use.")
+	local daChatOptTitle = cf("GameFontNormal", nil, nil, nil, "TOPLEFT", daAddonAdToggle, "BOTTOMLEFT", 250, 16, 2, -8, "Select Chat Channel to use.")
 	local info = {}
 	local daChatOpt = CF("Frame", "DAChatOpt", daOptions, "UIDropDownMenuTemplate")
 	daChatOpt:SetPoint("TOPLEFT", daChatOptTitle, "BOTTOMLEFT", -8, -8)
@@ -161,7 +168,7 @@ function daOptionsInit()
 			UIDropDownMenu_AddButton(info)
 		end
 	end
-	DAChatOptText:SetText("Chat Channel")
+	DAChatOptText:SetText(daSettings.options.daChannel)
 
 	-- Enable option to print to a second channel simultaneously
 	local daChat2Toggle =ccb("Toggle ability to print to a 2nd channel simultaneously.", 18, 18, "TOPLEFT", daChatOpt, "BOTTOMLEFT", 6, -8, "daChat2Toggle")
@@ -177,26 +184,26 @@ function daOptionsInit()
 
 	-- Pick and Set chat to announce to simultaneously
 	local daChat2OptTitle = cf("GameFontNormal", nil, nil, nil, "TOPLEFT", daChat2Toggle, "BOTTOMLEFT", 250, 16, 2, -8, "Select Chat Channel to use.")
-	local info = {}
+	local info2 = {}
 	local daChat2Opt = CF("Frame", "DAChat2Opt", daOptions, "UIDropDownMenuTemplate")
 	daChat2Opt:SetPoint("TOPLEFT", daChat2OptTitle, "BOTTOMLEFT", -8, -8)
 	daChat2Opt.initialize = function()
-		wipe(info)
-		local names = {"Guild Chat", "Party Chat", "Instance Chat", "Say Aloud", "Yell Aloud", "Local Chat", "Trade Chat"}
-		local chats = {"GUILD", "PARTY", "INSTANCE_CHAT", "SAY", "YELL", "General", "Trade"}
-		for i, chat in next, chats do
-			info.text = names[i]
-			info.value = chat
-			info.func = function(self)
+		wipe(info2)
+		local names2 = {"Guild Chat", "Party Chat", "Instance Chat", "Say Aloud", "Yell Aloud", "Local Chat", "Trade Chat"}
+		local chats2 = {"GUILD", "PARTY", "INSTANCE_CHAT", "SAY", "YELL", "General", "Trade"}
+		for i, chat2 in next, chats2 do
+			info2.text = names2[i]
+			info2.value = chat2
+			info2.func = function(self)
 				daSettings.options.daChannel2 = self.value
 				DAChatOptText:SetText(self:GetText())
 --				print(self.value)
 			end
-			info.checked = chat == daSettings.options.daChannel2
-			UIDropDownMenu_AddButton(info)
+			info2.checked = chat2 == daSettings.options.daChannel2
+			UIDropDownMenu_AddButton(info2)
 		end
 	end
-	DAChat2OptText:SetText("Chat Channel") 
+	DAChat2OptText:SetText(daSettings.options.daChannel2) 
 	
 	-- Enable Auto Announcing at 25% 50% & 75%
 	local daPercentToggle = ccb("Toggle reporting when at 25%, 50%, & 75% of level.", 18, 18, "TOPLEFT", daChat2Opt, "BOTTOMLEFT", 6, -8, "daPercentToggle")
@@ -250,6 +257,12 @@ function daInitialize()
 		daAutoToggle:SetChecked(false)
 	end
 
+	if daSettings.options.daAddOnName == true then
+		daAddonAdToggle:SetChecked(true)
+	else
+		daAddonAdToggle:SetChecked(false)
+	end
+
 	if daSettings.options.daChannel2Toggle == true then
 		daChat2Toggle:SetChecked(true)
 	else
@@ -268,6 +281,7 @@ function daInitialize()
 		daPercentLeftToggle:SetChecked(false)
 	end
 
+	curLevel = UnitLevel("player")
 	curXp = UnitXP("player")/UnitXPMax("player")
 	perCount = math.floor(curXp * 4)
 end
@@ -292,7 +306,7 @@ function daEvents_table.eventFrame:PLAYER_XP_UPDATE()
 end
 
 function daChatFunc(curLevel)
---	print("In daChatFunc")
+	--print("In daChatFunc")
 	if daSettings.options.daChannel == "General" then
 		index1 = "1"
 	elseif daSettings.options.daChannel == "Trade" then
@@ -318,7 +332,11 @@ function daChatFunc(curLevel)
 --		print(perCount)
 		if daSettings.options.daPercentLeft == false then
 			if curXp >= 0.75 and perCount<3 then
-				message = "I just hit 75% of level " .. curLevel .. "!"
+				if daSettings.options.daAddOnName == true then
+					message = "[Ding Announcer]: I just hit 75% of level " .. curLevel .. "!"
+				else
+					message = "I just hit 75% of level " .. curLevel .. "!"
+				end
 				if daSettings.options.daChannel2Toggle == false then
 					daSendMsg(message, index1)
 				elseif daSettings.options.daChannel2Toggle == true then
@@ -326,7 +344,11 @@ function daChatFunc(curLevel)
 					daSendMsg(message, index2)
 				end
 			elseif curXp >= 0.25 and perCount<1 then
-				message = "I just hit 25% of level " .. curLevel .. "!"
+				if daSettings.options.daAddOnName == true then
+					message = "[Ding Announcer]: I just hit 25% of level " .. curLevel .. "!"
+				else
+					message = "I just hit 25% of level " .. curLevel .. "!"
+				end
 				if daSettings.options.daChannel2Toggle == false then
 					daSendMsg(message, index1)
 				elseif daSettings.options.daChannel2Toggle == true then
@@ -334,7 +356,11 @@ function daChatFunc(curLevel)
 					daSendMsg(message, index2)
 				end
 			elseif curXp >= 0.5  and perCount<2 then
-				message = "I just hit 50% of level " .. curLevel .. "!"
+				if daSettings.options.daAddOnName == true then
+					message = "[Ding Announcer]: I just hit 50% of level " .. curLevel .. "!"
+				else
+					message = "I just hit 50% of level " .. curLevel .. "!"
+				end
 				if daSettings.options.daChannel2Toggle == false then
 					daSendMsg(message, index1)
 				elseif daSettings.options.daChannel2Toggle == true then
@@ -347,7 +373,11 @@ function daChatFunc(curLevel)
 		else
 --			print("In daPercentLeft")
 			if curXp >= 0.75 and perCount<3 then
-				message = "Only 25% left until level " .. curLevel+1 .. "!"
+				if daSettings.options.daAddOnName == true then
+					message = "[Ding Announcer]: Only 25% left until level " .. curLevel+1 .. "!"
+				else
+					message = "Only 25% left until level " .. curLevel+1 .. "!"
+				end
 				if daSettings.options.daChannel2Toggle == false then
 					daSendMsg(message, index1)
 				elseif daSettings.options.daChannel2Toggle == true then
@@ -355,7 +385,11 @@ function daChatFunc(curLevel)
 					daSendMsg(message, index2)
 				end
 			elseif curXp >= 0.25 and perCount<1 then
-				message = "Only 75% left until level " .. curLevel+1 .. "!"
+				if daSettings.options.daAddOnName == true then
+					message = "[Ding Announcer]: Only 75% left until level " .. curLevel+1 .. "!"
+				else
+					message = "Only 75% left until level " .. curLevel+1 .. "!"
+				end
 				if daSettings.options.daChannel2Toggle == false then
 					daSendMsg(message, index1)
 				elseif daSettings.options.daChannel2Toggle == true then
@@ -363,7 +397,11 @@ function daChatFunc(curLevel)
 					daSendMsg(message, index2)
 				end
 			elseif curXp >= 0.5 and perCount<2 then
-				message = "Only 50% left until level " .. curLevel+1 .. "!"
+				if daSettings.options.daAddOnName == true then
+					message = "[Ding Announcer]: Only 50% left until level " .. curLevel+1 .. "!"
+				else
+					message = "Only 50% left until level " .. curLevel+1 .. "!"
+				end
 				if daSettings.options.daChannel2Toggle == false then
 					daSendMsg(message, index1)
 				elseif daSettings.options.daChannel2Toggle == true then
@@ -378,7 +416,24 @@ function daChatFunc(curLevel)
 --		print("Level message")
 		ding = "no"
 		curLevel = curLevel + 1
-		message = "I just hit level " .. curLevel .. "!"
+		if daSettings.options.daAddOnName == true then
+			message = "[Ding Announcer]: I just hit level " .. curLevel .. "!"
+		else
+			message = "I just hit level " .. curLevel .. "!"
+		end
+		if daSettings.options.daChannel2Toggle == false then
+			daSendMsg(message, index1)
+		elseif daSettings.options.daChannel2Toggle == true then
+			daSendMsg(message, index1)
+			daSendMsg(message, index2)
+		end
+	elseif ding == "no" and reported == true then
+		reported = false
+		if daSettings.options.daAddOnName == true then
+			message = "[Ding Announcer]: Just letting you know that I am currently level " .. curLevel .. "!"
+		else
+			message = "Just letting you know that I am currently level " .. curLevel .. "!"
+		end
 		if daSettings.options.daChannel2Toggle == false then
 			daSendMsg(message, index1)
 		elseif daSettings.options.daChannel2Toggle == true then
@@ -391,7 +446,7 @@ function daChatFunc(curLevel)
 end
 
 function daSendMsg(message, index)
-	print("in daSendMsg")
+	--print("in daSendMsg")
 	if (index ~= nil) and daSettings.options.daChannel == "General" or daSettings.options.daChannel == "Trade" then
 		SendChatMessage(message, "CHANNEL", nil, index)
 	else
@@ -408,6 +463,18 @@ function daAuto()
 		ChatFrame1:AddMessage("Ding Announcer is now on |cFFFFF000Manual|r!")
 		daSettings.options.daActivate = false
 		daAutoToggle:SetChecked(false)
+	end
+end
+
+function daAddOnName()
+	if daSettings.options.daAddOnName == false then
+		ChatFrame1:AddMessage("Ding Announcer is now on |cFF00FF00Auto|r!")
+		daSettings.options.daAddOnName = true
+		daAddonAdToggle:SetChecked(true)
+	elseif daSettings.options.daAddOnName == true then
+		ChatFrame1:AddMessage("Ding Announcer is now on |cFFFFF000Manual|r!")
+		daSettings.options.daAddOnName = false
+		daAddonAdToggle:SetChecked(false)
 	end
 end
 
@@ -442,7 +509,10 @@ end
 function SlashCmdList.DINGANNOUNCER(msg)
 	if msg == "auto" then
 		daAuto()
+	elseif msg == "advert" then
+		daAddOnName()
 	elseif msg == "report" then
+		reported = true
 		daChatFunc(curLevel)
 	elseif msg == "options" then
 		daOption()
@@ -452,6 +522,7 @@ function SlashCmdList.DINGANNOUNCER(msg)
 		ChatFrame1:AddMessage("|cFF71C671Ding Announcer Slash Commands|r")
 		ChatFrame1:AddMessage("|cFF71C671type /DA followed by:|r")
 		ChatFrame1:AddMessage("|cFF71C671  -- auto to toggle auto announce functionality|r")
+		ChatFrame1:AddMessage("|cFF71C671  -- advert to toggle addon name in announce|r")
 		ChatFrame1:AddMessage("|cFF71C671  -- report to manually announce level &/or Percentage|r")
 		ChatFrame1:AddMessage("|cFF71C671  -- options to open addon options|r")
 		ChatFrame1:AddMessage("|cFF71C671  -- info to view current build info|r")
