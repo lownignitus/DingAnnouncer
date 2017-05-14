@@ -1,8 +1,8 @@
 ## Interface: 70200
 ## Title: |cff00ff00Ding Announcer|r
-## Version: |cffFF4500v1.0.4|r
+## Version: |cffFF4500v1.0.5|r
 ## Author: |cffDA70D6LownIgnitus|r Mihkael@US-Alexstrasza
-## X-Date: 13/05/2017
+## X-Date: 14/05/2017
 ## X-Website: https://www.facebook.com/groups/190240457669378/
 ## X-Notes: Announces to set chat when you ding
 ## X-Notes2: Can also announce % of level or % to next level
