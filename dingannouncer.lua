@@ -124,7 +124,7 @@ function daOptionsInit()
 	local daOptionsFrame = CF("Frame", DAOptionsFrame, daOptions)
 	daOptionsFrame:SetPoint("TOPLEFT", desc2, "BOTTOMLEFT", 0, -8)
 	daOptionsFrame:SetBackdrop(daOptionsBG)
-	daOptionsFrame:SetSize(450, 215)
+	daOptionsFrame:SetSize(450, 290)
 
 	local optionsTitle = cf("GameFontNormal", nil, nil, nil, "TOP", daOptionsFrame, "TOP", 250, 16, 35, -8, "Ding Announcer Options")
 
@@ -142,7 +142,7 @@ function daOptionsInit()
 		daAuto()
 	end)
 
-	local daAddonAdToggle = ccb("Toggle Addon name in Announce", 18, 18, "TOPLEFT", daAutoToggle, "TOPLEFT", 2, -8, "daAddonAdToggle")
+	local daAddonAdToggle = ccb("Toggle Addon name in Announce", 18, 18, "TOPLEFT", daAutoToggle, "TOPLEFT", 0, -20, "daAddonAdToggle")
 	daAddonAdToggle:SetScript("OnClick", function(self)
 		daAddOnName()
 	end)
