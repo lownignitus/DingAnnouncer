@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.1.0
+-- Version: 1.1.1
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
@@ -300,13 +300,13 @@ end
 
 function daEvents_table.eventFrame:PLAYER_XP_UPDATE()
 --	print("PLAYER_XP_UPDATE")
-	if daSettings.options.daActivate == true then
+	if daSettings.options.daActivate == true and daSettings.options.daPercent == true then
 		daChatFunc(curLevel)
 	end 
 end
 
 function daChatFunc(curLevel)
-	--print("In daChatFunc")
+--	print("In daChatFunc")
 	if daSettings.options.daChannel == "General" then
 		index1 = "1"
 	elseif daSettings.options.daChannel == "Trade" then
@@ -338,11 +338,11 @@ function daChatFunc(curLevel)
 					message = "I just hit 75% of level " .. curLevel .. "!"
 				end
 				if daSettings.options.daChannel2Toggle == false then
-					daSendMsg(message, index1)
+					daSendMsg(message, index1, 1)
 				elseif daSettings.options.daChannel2Toggle == true then
-					daSendMsg(message, index1)
-					daSendMsg(message, index2)
-				end
+					daSendMsg(message, index1, 1)
+					daSendMsg(message, index2, 2)
+				end	
 			elseif curXp >= 0.25 and perCount<1 then
 				if daSettings.options.daAddOnName == true then
 					message = "[Ding Announcer]: I just hit 25% of level " .. curLevel .. "!"
@@ -350,11 +350,11 @@ function daChatFunc(curLevel)
 					message = "I just hit 25% of level " .. curLevel .. "!"
 				end
 				if daSettings.options.daChannel2Toggle == false then
-					daSendMsg(message, index1)
+					daSendMsg(message, index1, 1)
 				elseif daSettings.options.daChannel2Toggle == true then
-					daSendMsg(message, index1)
-					daSendMsg(message, index2)
-				end
+					daSendMsg(message, index1, 1)
+					daSendMsg(message, index2, 2)
+				end	
 			elseif curXp >= 0.5  and perCount<2 then
 				if daSettings.options.daAddOnName == true then
 					message = "[Ding Announcer]: I just hit 50% of level " .. curLevel .. "!"
@@ -362,11 +362,11 @@ function daChatFunc(curLevel)
 					message = "I just hit 50% of level " .. curLevel .. "!"
 				end
 				if daSettings.options.daChannel2Toggle == false then
-					daSendMsg(message, index1)
+					daSendMsg(message, index1, 1)
 				elseif daSettings.options.daChannel2Toggle == true then
-					daSendMsg(message, index1)
-					daSendMsg(message, index2)
-				end
+					daSendMsg(message, index1, 1)
+					daSendMsg(message, index2, 2)
+				end	
 			elseif curXp <= 0.25 then
 				--
 			end
@@ -379,11 +379,11 @@ function daChatFunc(curLevel)
 					message = "Only 25% left until level " .. curLevel+1 .. "!"
 				end
 				if daSettings.options.daChannel2Toggle == false then
-					daSendMsg(message, index1)
+					daSendMsg(message, index1, 1)
 				elseif daSettings.options.daChannel2Toggle == true then
-					daSendMsg(message, index1)
-					daSendMsg(message, index2)
-				end
+					daSendMsg(message, index1, 1)
+					daSendMsg(message, index2, 2)
+				end	
 			elseif curXp >= 0.25 and perCount<1 then
 				if daSettings.options.daAddOnName == true then
 					message = "[Ding Announcer]: Only 75% left until level " .. curLevel+1 .. "!"
@@ -391,11 +391,11 @@ function daChatFunc(curLevel)
 					message = "Only 75% left until level " .. curLevel+1 .. "!"
 				end
 				if daSettings.options.daChannel2Toggle == false then
-					daSendMsg(message, index1)
+					daSendMsg(message, index1, 1)
 				elseif daSettings.options.daChannel2Toggle == true then
-					daSendMsg(message, index1)
-					daSendMsg(message, index2)
-				end
+					daSendMsg(message, index1, 1)
+					daSendMsg(message, index2, 2)
+				end	
 			elseif curXp >= 0.5 and perCount<2 then
 				if daSettings.options.daAddOnName == true then
 					message = "[Ding Announcer]: Only 50% left until level " .. curLevel+1 .. "!"
@@ -403,11 +403,11 @@ function daChatFunc(curLevel)
 					message = "Only 50% left until level " .. curLevel+1 .. "!"
 				end
 				if daSettings.options.daChannel2Toggle == false then
-					daSendMsg(message, index1)
+					daSendMsg(message, index1, 1)
 				elseif daSettings.options.daChannel2Toggle == true then
-					daSendMsg(message, index1)
-					daSendMsg(message, index2)
-				end		
+					daSendMsg(message, index1, 1)
+					daSendMsg(message, index2, 2)
+				end	
 			elseif curXp <= 0.25 then
 				--
 			end
@@ -422,10 +422,10 @@ function daChatFunc(curLevel)
 			message = "I just hit level " .. curLevel .. "!"
 		end
 		if daSettings.options.daChannel2Toggle == false then
-			daSendMsg(message, index1)
+			daSendMsg(message, index1, 1)
 		elseif daSettings.options.daChannel2Toggle == true then
-			daSendMsg(message, index1)
-			daSendMsg(message, index2)
+			daSendMsg(message, index1, 1)
+			daSendMsg(message, index2, 2)
 		end
 	elseif ding == "no" and reported == true then
 		reported = false
@@ -446,17 +446,24 @@ function daChatFunc(curLevel)
 end
 
 function daSendMsg(message, index, channel)
-	--print("in daSendMsg")
+--	print("in daSendMsg")
+--	print(message)
 	if channel == 1 then
+--		print("Channel 1")
 		if index ~= nil and daSettings.options.daChannel == "General" or daSettings.options.daChannel == "Trade" then
+--			print("General or Trade")
 			SendChatMessage(message, "CHANNEL", nil, index)
 		else
+--			print("Not General or Trade")
 			SendChatMessage(message, index)
 		end
 	elseif channel == 2 then
+--		print("Channel 1")
 		if index ~= nil and daSettings.options.daChannel2 == "General" or daSettings.options.daChannel2 == "Trade" then
-				SendChatMessage(message, "CHANNEL", nil, index)
+--			print("General or Trade")
+			SendChatMessage(message, "CHANNEL", nil, index)
 		else
+--			print("Not General or Trade")
 			SendChatMessage(message, index)
 		end
 	end

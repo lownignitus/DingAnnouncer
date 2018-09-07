@@ -1,6 +1,6 @@
 ## Interface: 80000
 ## Title: |cff00ff00Ding Announcer|r
-## Version: |cffFF4500v1.1.0|r
+## Version: |cffFF4500v1.1.1|r
 ## Author: |cffDA70D6LownIgnitus|r Mihkael@US-Alexstrasza
 ## X-Date: 07/09/2018
 ## X-Website: https://github.com/lownignitus/DingAnnouncer
