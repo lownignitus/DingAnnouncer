@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.0.7
+-- Version: 1.1.0
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
@@ -13,7 +13,7 @@ local message = ""
 local ding = "no"
 local perCount = 0
 local reported = false
-SLASH_DINGANNOUNCER1 = "/da" or "/DA" or "/DingAnnouncer" or "/dingannouncer"
+SLASH_DINGANNOUNCER1, SLASH_DINGANNOUNCER2, SLASH_DINGANNOUNCER3, SLASH_DINGANNOUNCER4 = "/da", "/DA", "/DingAnnouncer", "/dingannouncer"
 
 -- RegisterForEvent table
 local daEvents_table = {}
@@ -196,7 +196,7 @@ function daOptionsInit()
 			info2.value = chat2
 			info2.func = function(self)
 				daSettings.options.daChannel2 = self.value
-				DAChatOptText:SetText(self:GetText())
+				DAChat2OptText:SetText(self:GetText())
 --				print(self.value)
 			end
 			info2.checked = chat2 == daSettings.options.daChannel2
@@ -435,22 +435,30 @@ function daChatFunc(curLevel)
 			message = "Just letting you know that I am currently level " .. curLevel .. "!"
 		end
 		if daSettings.options.daChannel2Toggle == false then
-			daSendMsg(message, index1)
+			daSendMsg(message, index1, 1)
 		elseif daSettings.options.daChannel2Toggle == true then
-			daSendMsg(message, index1)
-			daSendMsg(message, index2)
+			daSendMsg(message, index1, 1)
+			daSendMsg(message, index2, 2)
 		end
 	end
 	perCount = math.floor(curXp * 4)
 --	print(perCount)
 end
 
-function daSendMsg(message, index)
+function daSendMsg(message, index, channel)
 	--print("in daSendMsg")
-	if (index ~= nil) and daSettings.options.daChannel == "General" or daSettings.options.daChannel == "Trade" then
-		SendChatMessage(message, "CHANNEL", nil, index)
-	else
-		SendChatMessage(message, index)
+	if channel == 1 then
+		if index ~= nil and daSettings.options.daChannel == "General" or daSettings.options.daChannel == "Trade" then
+			SendChatMessage(message, "CHANNEL", nil, index)
+		else
+			SendChatMessage(message, index)
+		end
+	elseif channel == 2 then
+		if index ~= nil and daSettings.options.daChannel2 == "General" or daSettings.options.daChannel2 == "Trade" then
+				SendChatMessage(message, "CHANNEL", nil, index)
+		else
+			SendChatMessage(message, index)
+		end
 	end
 end
 
