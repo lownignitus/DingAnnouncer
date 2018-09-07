@@ -468,11 +468,11 @@ end
 
 function daAddOnName()
 	if daSettings.options.daAddOnName == false then
-		ChatFrame1:AddMessage("Ding Announcer is now on |cFF00FF00Auto|r!")
+		ChatFrame1:AddMessage("Ding Announcer is |cFF00FF00now Advertising|r!")
 		daSettings.options.daAddOnName = true
 		daAddonAdToggle:SetChecked(true)
 	elseif daSettings.options.daAddOnName == true then
-		ChatFrame1:AddMessage("Ding Announcer is now on |cFFFFF000Manual|r!")
+		ChatFrame1:AddMessage("Ding Announcer is now on |cFFFFF000no longer Advertising|r!")
 		daSettings.options.daAddOnName = false
 		daAddonAdToggle:SetChecked(false)
 	end
