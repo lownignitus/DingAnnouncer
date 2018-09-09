@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.1.1
+-- Version: 1.1.2
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
@@ -20,9 +20,6 @@ local daEvents_table = {}
 
 daEvents_table.eventFrame = CF("Frame");
 daEvents_table.eventFrame:RegisterEvent("ADDON_LOADED");
-daEvents_table.eventFrame:RegisterEvent("PLAYER_LEVEL_UP");
-daEvents_table.eventFrame:RegisterEvent("PLAYER_XP_UPDATE");
---daEvents_table.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 daEvents_table.eventFrame:SetScript("OnEvent", function(self, event, ...)
 	daEvents_table.eventFrame[event](self, ...);
 end);
@@ -40,9 +37,9 @@ function daEvents_table.eventFrame:ADDON_LOADED(AddOn)
 		["options"] = {
 			["daActivate"] = true,
 			["daAddOnName"] = true,
-			["daChannel"] = "g",
+			["daChannel"] = "SAY",
 			["daChannel2Toggle"] = false,
-			["daChannel2"] = "p",
+			["daChannel2"] = "GUILD",
 			["daPercent"] = false,
 			["daPercentLeft"] = false,
 		}
@@ -62,18 +59,37 @@ function daEvents_table.eventFrame:ADDON_LOADED(AddOn)
 	end
 
 	daSettings = daSVCheck(deafults, daSettings)
+
+	daEvents_table.eventFrame:RegisterEvent("PLAYER_LEVEL_UP");
+	daEvents_table.eventFrame:RegisterEvent("PLAYER_XP_UPDATE");
+
 	daOptionsInit();
 	daInitialize();
 end
 
+function daEvents_table.eventFrame:PLAYER_LEVEL_UP()
+--	print("PLAYER_LEVEL_UP")
+	if daSettings.options.daActivate == true then
+		ding = "yes"
+		daChatFunc(curLevel)
+	end
+end
+
+function daEvents_table.eventFrame:PLAYER_XP_UPDATE()
+--	print("PLAYER_XP_UPDATE")
+	if daSettings.options.daActivate == true and daSettings.options.daPercent == true then
+		daChatFunc(curLevel)
+	end 
+end
+
 -- Options
 function daOptionsInit()
-	local daOptions = CF("Frame", nil, InterfaceOptionsFramePanelContainer);
+	local daOptions = CF("Frame", "daOptionsPanel", InterfaceOptionsFramePanelContainer);
 	local panelWidth = InterfaceOptionsFramePanelContainer:GetWidth() -- ~623
 	local wideWidth = panelWidth - 40
 	daOptions:SetWidth(wideWidth)
 	daOptions:Hide();
-	daOptions.name = "|cff00ff00Ding Announcer|r"
+	daOptions.name = GetAddOnMetadata(addon_name, "Title")
 	daOptionsBG = {edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, edgeSize = 16}
 
 	-- Special thanks to Ro for inspiration for the overall structure of this options panel (and the title/version/description code)
@@ -117,35 +133,22 @@ function daOptionsInit()
 	website:SetPoint("TOPLEFT", author, "BOTTOMLEFT", 0, -8)
 	local desc = cf("GameFontHighlight", GetAddOnMetadata(addon_name, "X-Notes"))
 	desc:SetPoint("TOPLEFT", website, "BOTTOMLEFT", 0, -8)
-	local desc2 = cf("GameFontHighlight", GetAddOnMetadata(addon_name, "X-Notes2"))
-	desc2:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", 0, -8)
 
 	-- Options
-	local daOptionsFrame = CF("Frame", DAOptionsFrame, daOptions)
-	daOptionsFrame:SetPoint("TOPLEFT", desc2, "BOTTOMLEFT", 0, -8)
-	daOptionsFrame:SetBackdrop(daOptionsBG)
-	daOptionsFrame:SetSize(450, 290)
+	local daOptFrame = CF("Frame", DAOptFrame, daOptions)
+	daOptFrame:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", 0, -8)
+	daOptFrame:SetBackdrop(daOptionsBG)
+	daOptFrame:SetSize(450, 290)
 
-	local optionsTitle = cf("GameFontNormal", nil, nil, nil, "TOP", daOptionsFrame, "TOP", 250, 16, 35, -8, "Ding Announcer Options")
+	local optTitle = cf("GameFontNormal", nil, nil, nil, "TOP", daOptFrame, "TOP", 250, 16, 35, -8, "Ding Announcer Options")
 
 	-- Enable addon, 
-	local daAutoToggle = ccb("Toggle Auto Announce", 18, 18, "TOPLEFT", optionsTitle, "TOPLEFT", -130, -16, "daAutoToggle")
-	daAutoToggle:SetScript("OnClick", function(self) 
---[[		print("Toggle")
-		if daAutoToggle:GetChecked() == true then
-			print("true")
-			daSettings.options.daActivate = true
-		else
-			print("false")
-			daSettings.options.daActivate = false
-		end]]
-		daAuto()
-	end)
+	local daAutoToggle = ccb("Toggle Auto Announce", 18, 18, "TOPLEFT", optTitle, "TOPLEFT", -130, -16, "daAutoToggle")
+	
+	daAutoToggle:SetScript("OnClick", function(self) daAuto() end)
 
 	local daAddonAdToggle = ccb("Toggle Addon name in Announce", 18, 18, "TOPLEFT", daAutoToggle, "TOPLEFT", 0, -20, "daAddonAdToggle")
-	daAddonAdToggle:SetScript("OnClick", function(self)
-		daAddOnName()
-	end)
+	daAddonAdToggle:SetScript("OnClick", function(self)	daAddOnName() end)
 
 	-- Pick and Set chat to announce to
 	local daChatOptTitle = cf("GameFontNormal", nil, nil, nil, "TOPLEFT", daAddonAdToggle, "BOTTOMLEFT", 250, 16, 2, -8, "Select Chat Channel to use.")
@@ -284,25 +287,6 @@ function daInitialize()
 	curLevel = UnitLevel("player")
 	curXp = UnitXP("player")/UnitXPMax("player")
 	perCount = math.floor(curXp * 4)
-end
-
-function daEvents_table.eventFrame:PLAYER_ENTERING_WORLD()
-	-- body
-end
-
-function daEvents_table.eventFrame:PLAYER_LEVEL_UP()
---	print("PLAYER_LEVEL_UP")
-	if daSettings.options.daActivate == true then
-		ding = "yes"
-		daChatFunc(curLevel)
-	end
-end
-
-function daEvents_table.eventFrame:PLAYER_XP_UPDATE()
---	print("PLAYER_XP_UPDATE")
-	if daSettings.options.daActivate == true and daSettings.options.daPercent == true then
-		daChatFunc(curLevel)
-	end 
 end
 
 function daChatFunc(curLevel)
@@ -494,14 +478,14 @@ function daAddOnName()
 end
 
 function daOption()
-	InterfaceOptionsFrame_OpenToCategory("|cff00ff00Ding Announcer|r");
-	InterfaceOptionsFrame_OpenToCategory("|cff00ff00Ding Announcer|r");
+	InterfaceOptionsFrame_OpenToCategory(GetAddOnMetadata(addon_name, "Title"));
+	InterfaceOptionsFrame_OpenToCategory(GetAddOnMetadata(addon_name, "Title"));
 end
 
 function daInfo()
-	ChatFrame1:AddMessage(GetAddOnMetadata("DingAnnouncer", "Title") .. " " .. GetAddOnMetadata("DingAnnouncer", "Version"))
-	ChatFrame1:AddMessage("Author: " .. GetAddOnMetadata("DingAnnouncer", "Author"))
-	ChatFrame1:AddMessage("Build Date: " .. GetAddOnMetadata("DingAnnouncer", "X-Date"))
+	ChatFrame1:AddMessage(GetAddOnMetadata(addon_name, "Title") .. " " .. GetAddOnMetadata(addon_name, "Version"))
+	ChatFrame1:AddMessage("Author: " .. GetAddOnMetadata(addon_name, "Author"))
+	ChatFrame1:AddMessage("Build Date: " .. GetAddOnMetadata(addon_name, "X-Date"))
 end
 
 function daReset()
