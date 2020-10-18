@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.1.4
+-- Version: 1.1.6
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
@@ -135,7 +135,7 @@ function daOptionsInit()
 	desc:SetPoint("TOPLEFT", website, "BOTTOMLEFT", 0, -8)
 
 	-- Options
-	local daOptFrame = CF("Frame", DAOptFrame, daOptions)
+	local daOptFrame = CF("Frame", DAOptFrame, daOptions, "BackdropTemplate")
 	daOptFrame:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", 0, -8)
 	daOptFrame:SetBackdrop(daOptionsBG)
 	daOptFrame:SetSize(450, 290)
