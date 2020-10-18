@@ -1,8 +1,8 @@
-## Interface: 90001
+## Interface: 80205
 ## Title: |cff00ff00Ding Announcer|r
-## Version: |cffFF4500v1.1.6|r
+## Version: |cffFF4500v1.1.5|r
 ## Author: |cffDA70D6LownIgnitus|r Mihkael @ US-Alexstrasza
-## X-Date: 17/10/2020
+## X-Date: 24/09/2019
 ## X-Website: https://github.com/lownignitus/DingAnnouncer
 ## X-Notes: Announces to set chat when you ding. Can also announce % of level or % to next level
 ## SavedVariables: daSettings
