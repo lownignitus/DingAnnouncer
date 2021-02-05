@@ -1,6 +1,6 @@
 -- Title: Ding Announcer
 -- Author: LownIgnitus
--- Version: 1.1.6
+-- Version: 1.1.7
 -- Desc: Announces to set chat when you ding
 -- And can also announce % of level or % to next level
 
